@@ -1,6 +1,6 @@
 <div align="center" style="text-align: center;">
 
-![logo](./assets/logo.png)
+[demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/)
 
   <h1>Divide up circle in proportional areas by chords </h1>
 
@@ -52,7 +52,7 @@ Lorem ipsum dolor sit amet.
 
 ## 🙈 Demo page
 
-A demo page is avaible, you can run it using `yarn start:demo`.
+A [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/) is avaible.
 
 ## 🐛 Issues & contributing
 
