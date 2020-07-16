@@ -28,7 +28,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "prettier": "prettier src/**/*.{js,jsx,ts,tsx} --write",
     "lint": "tslint -p tsconfig.json",
-    "prepublish": "rm -rf dist/ && tsc",
+    "prepublish": "rm -rf dist/ && tsc --outDir dist",
     "clean": "yarn format && yarn lint",
     "start:demo": "parcel demo/index.html",
     "build": "parcel build demo/index.html --out-dir demo-build"
@@ -38,6 +38,7 @@
     "@types/lodash": "^4.14.157",
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
+    "cssnano": "^4.1.10",
     "eslint": "^7.4.0",
     "eslint-config-prettier": "^6.11.0",
     "prettier": "^2.0.5",
