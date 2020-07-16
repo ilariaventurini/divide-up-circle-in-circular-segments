@@ -19,9 +19,19 @@
     "segmentarea"
   ],
   "scripts": {
-    "compile": "tsc",
-    "lint": "eslint src/**/*.{js,jsx,ts,tsx} --fix",
-    "prettier": "prettier src/**/*.{js,jsx,ts,tsx} --write"
+    "compile": "tsc --outDir dist",
+    "compile-watch": "tsc -w --outDir dist",
+    "test": "jest --config jestconfig.json",
+    "test-watch": "jest --watch --config jestconfig.json",
+    "coverage-watch": "yarn test --watchAll --coverage",
+    "coverage-interactive-watch": "npx live-server --port=9000 coverage",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "prettier": "prettier src/**/*.{js,jsx,ts,tsx} --write",
+    "lint": "tslint -p tsconfig.json",
+    "prepublish": "rm -rf dist/ && tsc",
+    "clean": "yarn format && yarn lint",
+    "start:demo": "parcel demo/index.html",
+    "build": "parcel build demo/index.html --out-dir demo-build"
   },
   "devDependencies": {
     "@types/d3": "^5.7.2",

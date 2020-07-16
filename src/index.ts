@@ -1,1 +1,1 @@
-export { hello } from './lib/hello'
+export { findAreasInfo } from './lib'
