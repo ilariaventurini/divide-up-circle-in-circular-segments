@@ -10,7 +10,7 @@
     "name": "Ilaria Venturini",
     "email": "venturini.ila@gmail.com"
   },
-  "private": true,
+  "private": false,
   "license": "MIT",
   "keywords": [
     "circles",
