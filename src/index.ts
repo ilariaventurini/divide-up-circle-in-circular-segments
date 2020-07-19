@@ -1,1 +1,1 @@
-export { findAreasInfo } from './lib'
+export { computeCircularSegmentsInfo } from './lib'
