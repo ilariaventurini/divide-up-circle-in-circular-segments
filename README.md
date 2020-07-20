@@ -1,6 +1,6 @@
 <div align="center" style="text-align: center;">
 
-[demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/)
+[demo page](https://divide-up-circle-in-circular-segments.netlify.app/)
 
   <h1>Divide up circle in circular segments</h1>
 
