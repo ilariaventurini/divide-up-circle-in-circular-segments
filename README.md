@@ -2,7 +2,7 @@
 
 [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/)
 
-  <h1>Divide up circle in proportional areas by chords </h1>
+  <h1>Divide up circle in circular segments</h1>
 
 </div>
 
