@@ -1,33 +1,68 @@
+import 'tachyons'
+import 'tachyons-extra'
 import { select } from 'd3-selection'
-import { random } from 'lodash'
-import { randomWithFixedSum, randomColor } from './utils'
-import { findAreasInfo } from '../src'
+import { generateData, randomColor } from './utils'
+import { computeCircularSegmentsInfo } from '../src'
+import { CirclularSegmentInfo } from '../src/lib/types'
 
-const root = select('#app')
+///////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////
-
-function generateData() {
-  const n = random(2, 6)
-  const percentages = randomWithFixedSum(n, 1)
-  const dataset = percentages.map((p) => ({
-    F: p,
-    color: randomColor(),
-  }))
-  return dataset
-}
-
-///////////////////////////////
-
-const size = 400
+const notHighligthOpacityValue = 0.6
+const size = 200
 const r = size / 2
 const cx = r
 const cy = r
 
-const info = findAreasInfo(r, cx, cy, generateData()) as any
-console.log('info: ', info)
+const root = select('#app')
 
-const circles = info.map((ii) => `<path d="${ii.d}" fill="${ii.color}" />`)
-console.log('circles: ', circles)
+///////////////////////////////////////////////////////////////////////////////
 
-root.append('svg').attr('width', size).attr('height', size).html(circles)
+function createCircularSegments(parentNode: any) {
+  // remove old viz
+  root.selectAll('.paths-container').remove()
+  // create new data
+  const dataset = generateData([2, 6], 1)
+  const circularSegmentsInfo: CirclularSegmentInfo[] = computeCircularSegmentsInfo(
+    r,
+    { x: cx, y: cy },
+    dataset
+  )
+  console.log('dataset:', dataset)
+  console.log('circularSegmentsInfo:', circularSegmentsInfo)
+  // append viz
+  parentNode
+    .append('g')
+    .attr('class', 'paths-container')
+    .selectAll('.path')
+    .data(circularSegmentsInfo)
+    .enter()
+    .append('path')
+    .attr('class', (_, i) => `path-${i}`)
+    .attr('d', (info) => info.path)
+    .style('fill', () => randomColor())
+    .attr('fill-opacity', notHighligthOpacityValue)
+    .on('mouseover', function () {
+      select(this).style('fill-opacity', 1)
+    })
+    .on('mouseout', function () {
+      select(this).style('fill-opacity', notHighligthOpacityValue)
+    })
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const container = root
+  .append('div')
+  .attr('class', 'flex flex-column bg-light-gray h-100 justify-center items-center')
+
+const circleContainer = container.append('div')
+const svg = circleContainer.append('svg').attr('width', size).attr('height', size)
+const circularSegments = createCircularSegments(svg)
+
+const randomButton = container
+  .append('div')
+  .attr('class', 'br-pill bg-black white pa2 mt3 flex flex-center pointer user-select-none')
+  .html('Random')
+  .on('click', function () {
+    createCircularSegments(svg)
+  })
