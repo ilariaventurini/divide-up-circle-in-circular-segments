@@ -24,7 +24,7 @@ npm install divide-up-circle-in-proportional-areas-by-chords --save
 
 ## 🙈 Demo page
 
-A [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/) is avaible.
+A [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/) is available.
 
 ## 🐛 Issues & contributing
 
