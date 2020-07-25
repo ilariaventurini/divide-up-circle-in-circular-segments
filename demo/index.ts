@@ -8,6 +8,7 @@ import { scaleOrdinal } from 'd3'
 
 const debug = false
 
+const opacity = 0.6
 const size = 200
 const r = size / 2
 const cx = r
@@ -64,7 +65,7 @@ function createCircularSegments(container: any) {
     .attr('class', (_, i) => `path-${i}`)
     .attr('d', (info) => info.path)
     .style('fill', (_, i) => colorScale(i))
-    .attr('fill-opacity', 0.6)
+    .attr('fill-opacity', opacity)
 
   // append legend
   const legendEnterSelection = legendContainer
@@ -83,6 +84,7 @@ function createCircularSegments(container: any) {
   legendEnterSelection
     .append('div')
     .attr('class', 'br-100 w1 h1')
+    .style('opacity', opacity)
     .style('background-color', (_, i) => colorScale(i))
   legendEnterSelection
     .append('div')
