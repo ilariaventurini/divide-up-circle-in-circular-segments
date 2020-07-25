@@ -16,3 +16,14 @@ body {
   width: 100%;
   position: fixed;
 }
+
+.button {
+  background-color: black;
+  opacity: 0.8;
+  color: white;
+  transition: opacity 0.2s;
+}
+
+.button:hover {
+  opacity: 1;
+}
