@@ -1,15 +1,16 @@
 import 'tachyons'
 import 'tachyons-extra'
-import { select } from 'd3-selection'
+import { round, range } from 'lodash'
+import { select, selectAll } from 'd3-selection'
+import { scaleOrdinal } from 'd3-scale'
 import { generateData, randomColor } from './utils'
 import { computeCircularSegmentsInfo } from '../src'
-import { round, range } from 'lodash'
-import { scaleOrdinal } from 'd3'
 
 const debug = false
 
 const opacity = 0.6
-const size = 200
+const overedOpacity = 0.8
+const size = 250
 const r = size / 2
 const cx = r
 const cy = r
@@ -66,6 +67,14 @@ function createCircularSegments(container: any) {
     .attr('d', (info) => info.path)
     .style('fill', (_, i) => colorScale(i))
     .attr('fill-opacity', opacity)
+    .on('mouseover', function (_, i) {
+      select(this).style('fill-opacity', overedOpacity)
+      select(`.legend-item-${i}`).style('opacity', overedOpacity)
+    })
+    .on('mouseout', function () {
+      select(this).style('fill-opacity', opacity)
+      selectAll(`.item`).style('opacity', opacity)
+    })
 
   // append legend
   const legendEnterSelection = legendContainer
@@ -83,7 +92,7 @@ function createCircularSegments(container: any) {
 
   legendEnterSelection
     .append('div')
-    .attr('class', 'br-100 w1 h1')
+    .attr('class', (_, i) => `legend-item-${i} item br-100 w1 h1`)
     .style('opacity', opacity)
     .style('background-color', (_, i) => colorScale(i))
   legendEnterSelection
@@ -99,5 +108,4 @@ function createCircularSegments(container: any) {
     .on('click', function () {
       createCircularSegments(container)
     })
-    .on('mouseover', (d) => select(d).attr('class', 'red'))
 }
