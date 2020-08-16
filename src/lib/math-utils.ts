@@ -54,7 +54,7 @@ export function computeInfo<T extends Percentage>(
 export function circularSegmentHeight(
   percentage: number,
   radius: number,
-  iterations = 1000
+  iterations = 20
 ): { height: number; theta: number } {
   const { PI, sin, cos, pow } = Math
 
