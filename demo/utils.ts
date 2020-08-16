@@ -1,5 +1,7 @@
 import { random } from 'lodash'
 
+const COUNTER_EXTENT = [2, 6] as [number, number]
+
 // Return an array of 'amount' numbers whose sum is exactly 'sum'
 export function randomWithFixedSum(amount: number, sum: number) {
   const numbers = Array(amount).fill(0).map(Math.random)
@@ -17,10 +19,12 @@ export function randomColor() {
 }
 
 // Generate an array of numbers with length in 'counterExtents' and the sum of the numbers is equal to 'sumValue'
-export function generateData(counterExtents: [number, number] = [2, 6], sumValues = 1) {
+export function generateData(
+  counterExtents = COUNTER_EXTENT,
+  sumValues = 1
+): Array<{ percentage: number; color: string }> {
   const [minCounter, maxCounter] = counterExtents
   const n = random(minCounter, maxCounter)
   const percentages = randomWithFixedSum(n, sumValues)
-  const dataset = percentages.map((p) => p)
-  return dataset
+  return percentages.map((p) => ({ percentage: p, color: randomColor() }))
 }

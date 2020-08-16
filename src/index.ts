@@ -1,1 +1,1 @@
-export { computeCircularSegmentsInfo } from './lib'
+export { computeCircularSegments } from './lib'

@@ -1,10 +1,9 @@
 import 'tachyons'
 import 'tachyons-extra'
-import { round, range } from 'lodash'
-import { select, selectAll } from 'd3-selection'
-import { scaleOrdinal } from 'd3-scale'
-import { generateData, randomColor } from './utils'
-import { computeCircularSegmentsInfo } from '../src'
+import { round } from 'lodash'
+import { select, selectAll, Selection } from 'd3-selection'
+import { generateData } from './utils'
+import { computeCircularSegments } from '../src'
 
 const debug = false
 
@@ -25,7 +24,7 @@ createCircularSegments(container)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-function createCircularSegments(container: any) {
+function createCircularSegments(container: Selection<HTMLDivElement, unknown, HTMLElement, any>) {
   // remove old viz
   container.selectAll('#example').remove()
 
@@ -49,23 +48,19 @@ function createCircularSegments(container: any) {
 
   // create new data
   const dataset = generateData(numberOfSegmentsExtent, sumValue)
-  const circularSegmentsInfo = computeCircularSegmentsInfo(r, { x: cx, y: cy }, dataset)
-
-  const colorDomain = circularSegmentsInfo.map((_, i) => i.toString())
-  const colorRange = range(circularSegmentsInfo.length).map(randomColor)
-  const colorScale = scaleOrdinal().domain(colorDomain).range(colorRange)
+  const circularSegments = computeCircularSegments(r, { x: cx, y: cy }, dataset)
 
   // append viz
   svg
     .append('g')
     .attr('class', 'paths-container')
     .selectAll('.path')
-    .data(circularSegmentsInfo)
+    .data(circularSegments)
     .enter()
     .append('path')
     .attr('class', (_, i) => `path-${i}`)
     .attr('d', (info) => info.path)
-    .style('fill', (_, i) => colorScale(i))
+    .style('fill', (datum) => datum.color)
     .attr('fill-opacity', opacity)
     .on('mouseover', function (_, i) {
       select(this).style('fill-opacity', overedOpacity)
@@ -79,22 +74,20 @@ function createCircularSegments(container: any) {
   // append legend
   const legendEnterSelection = legendContainer
     .selectAll('.legend-item')
-    .data(circularSegmentsInfo)
+    .data(circularSegments)
     .enter()
     .append('div')
     .attr(
       'class',
       (_, i) =>
-        `flex items-center ${i !== circularSegmentsInfo.length - 1 ? 'mb2' : ''} ${
-          debug ? 'ba' : ''
-        }`
+        `flex items-center ${i !== circularSegments.length - 1 ? 'mb2' : ''} ${debug ? 'ba' : ''}`
     )
 
   legendEnterSelection
     .append('div')
     .attr('class', (_, i) => `legend-item-${i} item br-100 w1 h1`)
     .style('opacity', opacity)
-    .style('background-color', (_, i) => colorScale(i))
+    .style('background-color', (datum) => datum.color)
   legendEnterSelection
     .append('div')
     .attr('class', 'ml2')

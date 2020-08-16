@@ -1,45 +1,32 @@
 import { Percentage, Point, CirclularSegmentInfo } from './types'
-import {
-  circularSegmentHeight,
-  computeCumulativeNumbers,
-  computeCircularSegmentPathStrings,
-} from './math-utils'
-import { sum } from 'lodash'
+import { computeCumulativePercentages, computeInfo } from './math-utils'
+import { sumBy } from 'lodash'
 
 /**
- * Given the radius and the center of the circle and an array of percentages, it returns an array of objects containing:
- * - the original percentage value
+ * Given the radius and the center of the circle and an array of objects containing a percentage propery,
+ * it returns an array of objects containing:
+ * - the original object
  * - the angle subtended by the chord at the centre of the circle related to the circlular segment
  * - the path to draw the circular segment
  * - the center point of the circular segment.
- * @param r circle radius
+ * @param radius circle radius
  * @param center circle center point
- * @param percentanges array of percentages (each percentage should be in [0, 1])
+ * @param dataset array of objects, each object must contains a percentage property (a number in [0, 1])
  */
-export function computeCircularSegmentsInfo(
-  r: number,
+export function computeCircularSegments<T extends Percentage>(
+  radius: number,
   center: Point,
-  percentages: Percentage[]
-): CirclularSegmentInfo[] {
-  if (!percentages.length) {
-    throw new Error(
-      `The 'percentages' array must contain at least one element and the sum of the percentages values must be 1.`
-    )
+  dataset: T[]
+): Array<CirclularSegmentInfo<T>> {
+  if (!dataset.length) {
+    throw new Error(`The dataset must contain at least one element.`)
   }
-  if (sum(percentages) !== 1) {
-    throw new Error(`The sum of 'percentages' values must be 1. Your sum is ${sum(percentages)}.`)
+  const percentageSum = sumBy(dataset, 'percentage')
+  if (percentageSum !== 1) {
+    throw new Error(`The sum of 'percentage' values must be 1. Your sum is ${percentageSum}.`)
   }
 
-  // create cumulative previuous percentages
-  const cumulativePercentages = computeCumulativeNumbers(percentages)
+  const cumulativePercentages = computeCumulativePercentages(dataset)
 
-  // compute segments heights and angles
-  const segmentsInfo = cumulativePercentages.map(({ percentage, cumulativePercentage }) => ({
-    percentage,
-    cumulativePercentage,
-    ...circularSegmentHeight(cumulativePercentage, r),
-  })) as CirclularSegmentInfo[]
-
-  // compute the circular segment path strings
-  return computeCircularSegmentPathStrings(segmentsInfo, r, center)
+  return computeInfo(radius, center, cumulativePercentages)
 }

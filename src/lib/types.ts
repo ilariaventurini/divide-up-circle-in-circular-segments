@@ -1,11 +1,17 @@
-export type Point = { x: number; y: number }
-export type Percentage = number
-export type CumulativePercentage = { percentage: number; cumulativePercentage: number }
-export type CirclularSegmentInfo = {
-  height?: number
-  theta: number
+export interface Point {
+  x: number
+  y: number
+}
+
+export interface Percentage {
   percentage: number
-  cumulativePercentage?: number
-  path?: string
-  circlularSegmentCenter?: Point
+}
+
+export type CumulativePercentage<T> = T & Percentage & { cumulativePercentage: number }
+
+export type CirclularSegmentInfo<T> = CumulativePercentage<T> & {
+  height: number
+  theta: number
+  path: string
+  circlularSegmentCenter: Point
 }
