@@ -36,11 +36,7 @@ npm install divide-up-circle-in-proportional-areas-by-chords --save
 
 ![demo](https://user-images.githubusercontent.com/44204353/90682534-627aa300-e265-11ea-9082-193a2c64b20b.gif)
 
-## 🙈 Demo page
-
-A [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/) is available.
-
-## 🐝 Usage
+## 🐝 API
 
 As seen before, you can create circular segments proportional by circle area.
 
@@ -160,6 +156,10 @@ In this case the `options` object is undefined and since the default orientation
 Setting orientation to `vertical` (`computeCircularSegments(dataset, r, center, { orientation: 'vertical' })`), you get:
 
 ![vert](https://user-images.githubusercontent.com/44204353/90673568-3c023b00-e258-11ea-9763-11d9933de66b.png)
+
+## 🙈 Demo page
+
+A [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/) is available.
 
 ## License
 
