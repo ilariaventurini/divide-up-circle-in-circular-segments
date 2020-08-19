@@ -19,10 +19,10 @@ export function computeCumulativePercentages<T extends Percentage>(
   dataset: T[]
 ): Array<CumulativePercentage<T>> {
   return dataset.reduce((prevWithCumPercentages, datum, i) => {
-    const cumulativePart = i === 0 ? 0 : prevWithCumPercentages[i - 1].cumulativePercentage
+    const cumulativeParcentage = i === 0 ? 0 : prevWithCumPercentages[i - 1].cumulativePercentage
     const newDatum = {
       ...datum,
-      cumulativePercentage: datum.percentage + cumulativePart,
+      cumulativePercentage: datum.percentage + cumulativeParcentage,
     }
     prevWithCumPercentages.push(newDatum)
     return prevWithCumPercentages
@@ -38,17 +38,17 @@ export function computeCumulativePercentages<T extends Percentage>(
  * - the center point of the circular segment.
  * @param radius circle radius
  * @param center circle center
- * @param cumulativePercentages array of objects containing the original values and the cumulative percentage value
+ * @param dataset array of objects containing the original values and the cumulative percentage values
  * @param options options object
  */
 export function computeHeightsAndAngle<T extends Percentage>(
   radius: number,
   center: Point,
-  cumulativePercentages: Array<CumulativePercentage<T>>,
-  defaultedOptions: Options
+  dataset: Array<CumulativePercentage<T>>,
+  options: Options
 ): Array<CirclularSegmentInfo<T>> {
   // compute cumulative height and angle
-  const segmentsWithCumulativeHeightAndAngle = cumulativePercentages.map((datum) => {
+  const segmentsWithCumulativeHeightAndAngle = dataset.map((datum) => {
     const { height, theta } = circularSegmentHeightAndAngle(datum.cumulativePercentage, radius)
     return {
       ...datum,
@@ -66,7 +66,7 @@ export function computeHeightsAndAngle<T extends Percentage>(
   })
 
   // compute the circular segment info
-  return computeCircularSegmentsInfo(segmentsWithHeightsAndAngle, radius, center, defaultedOptions)
+  return computeCircularSegmentsInfo(segmentsWithHeightsAndAngle, radius, center, options)
 }
 
 /**
@@ -105,13 +105,12 @@ export function circularSegmentHeightAndAngle(
 }
 
 /**
- * Given the circle radius, the circle center and some information about circular segments (height and angle),
+ * Given the circle radius, the circle center and some information about circular segments (height, cumulative height and angle),
  * it computes and returns more info about those circular segments like:
- * - the original object
- * - the angle subtended by the chord at the centre of the circle related to the circlular segment
- * - the path to draw the circular segment
- * - the center point of the circular segment..
- * @param segmentsInfo some info about circular segments.
+ * - the path string useful to draw the circular segment
+ * - the center point of the circular segment
+ * - coordinates of vertices of circular segment.
+ * @param segmentsInfo some info about circular segments
  * @param radius circle radius
  * @param center circle center
  * @param options options object
@@ -122,7 +121,7 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
   center: Point,
   options: Options
 ): Array<CirclularSegmentInfo<T>> {
-  const segmentsInfoWithPath = segmentsInfo.map((segmentInfo) => {
+  return segmentsInfo.map((segmentInfo) => {
     const vertices = computeVertices(segmentInfo, radius, center, options)
     const circlularSegmentCenter = computeCenter(segmentInfo, radius, center, options)
     const path = computePath(vertices, radius, segmentInfo.theta, options)
@@ -134,8 +133,6 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
       vertices,
     } as CirclularSegmentInfo<T>
   })
-
-  return segmentsInfoWithPath
 }
 
 function computeVertices<T extends Percentage>(

@@ -27,4 +27,11 @@ export function generateData(
   const n = random(minCounter, maxCounter)
   const percentages = randomWithFixedSum(n, sumValues)
   return percentages.map((p) => ({ percentage: p, color: randomColor() }))
+
+  // readme example
+  // return [
+  //   { percentage: 0.3, color: '#ff787a' },
+  //   { percentage: 0.3, color: '#7f7ad9' },
+  //   { percentage: 0.4, color: '#74dfc9' },
+  // ]
 }

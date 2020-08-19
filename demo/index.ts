@@ -4,6 +4,7 @@ import { round } from 'lodash'
 import { select, selectAll, Selection } from 'd3-selection'
 import { generateData, COUNTER_EXTENT } from './utils'
 import { computeCircularSegments } from '../src'
+import { Orientation } from '../src/lib/types'
 
 const debug = false
 
@@ -15,6 +16,9 @@ const cx = r
 const cy = r
 const sumValue = 1
 
+let orientation = 'horizontal' as Orientation
+let dataset = generateData(COUNTER_EXTENT, sumValue)
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const root = select('#app')
@@ -23,11 +27,38 @@ createCircularSegments(container)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-function createCircularSegments(container: Selection<HTMLDivElement, unknown, HTMLElement, any>) {
+function createCircularSegments(
+  container: Selection<HTMLDivElement, unknown, HTMLElement, any>,
+  oldDataset?: Array<{ percentage: number; color: string }>
+) {
+  const radios = `
+  <div class='flex ${debug ? 'ba' : ''}'>
+    <div class='b mr2'>Orientation:</div>
+    <form id='orientations'>
+      <input class='mr1 pointer' type='radio' value='horizontal' name='orientation' ${
+        orientation === 'horizontal' ? 'checked' : ''
+      }>horizontal</input>
+      <input class='ml2 mr1 pointer' type='radio' value='vertical' name='orientation' ${
+        orientation === 'vertical' ? 'checked' : ''
+      }>vertical</input>
+    </form>
+  </div>`
+
   // remove old viz
   container.selectAll('#example').remove()
 
-  const contentContainer = container
+  const example = container
+    .append('div')
+    .attr('id', 'example')
+    .attr('class', `${debug ? 'ba b--black' : ''} flex flex-column`)
+
+  const orientationButtons = example
+    .append('div')
+    .attr('id', 'orientation-radio')
+    .attr('class', `${debug ? 'bg-orange' : ''} `)
+    .html(radios)
+
+  const contentContainer = example
     .append('div')
     .attr('id', 'example')
     .attr('class', `${debug ? 'ba b--black' : ''} flex`)
@@ -46,8 +77,14 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
   const legendContainer = rightColumn.append('div').attr('class', `${debug ? 'bg-yellow' : ''}`)
 
   // create new data
-  const dataset = generateData(COUNTER_EXTENT, sumValue)
-  const circularSegments = computeCircularSegments(dataset, r, { x: cx, y: cy })
+  const dataset = oldDataset ? oldDataset : generateData(COUNTER_EXTENT, sumValue)
+
+  const circularSegments = computeCircularSegments(
+    dataset,
+    r,
+    { x: cx, y: cy },
+    { orientation: orientation }
+  )
 
   // append viz
   const selectionJoin = svg
@@ -144,4 +181,11 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
     .on('click', function () {
       createCircularSegments(container)
     })
+
+  // orientation radio buttons
+  selectAll("input[name='orientation']").on('change', function (d) {
+    // @ts-ignore
+    orientation = this.value
+    createCircularSegments(container, dataset)
+  })
 }
