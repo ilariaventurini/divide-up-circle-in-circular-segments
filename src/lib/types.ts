@@ -19,7 +19,6 @@ export interface Percentage {
 export type CumulativePercentage<T> = T & Percentage & { cumulativePercentage: number }
 
 export type CirclularSegmentInfo<T> = CumulativePercentage<T> & {
-  h: number
   height: number
   cumulativeHeight: number
   theta: number

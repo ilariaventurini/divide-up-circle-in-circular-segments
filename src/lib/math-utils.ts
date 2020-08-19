@@ -40,19 +40,32 @@ export function computeCumulativePercentages<T extends Percentage>(
  * @param cumulativePercentages array of objects containing the original values and the cumulative percentage value
  * @param options options object
  */
-export function computeInfo<T extends Percentage>(
+export function computeHeightsAndAngle<T extends Percentage>(
   radius: number,
   center: Point,
   cumulativePercentages: Array<CumulativePercentage<T>>,
   defaultedOptions: Options
 ): Array<CirclularSegmentInfo<T>> {
-  const segmentsWithHeightAndAngle = cumulativePercentages.map((datum) => ({
-    ...datum,
-    ...circularSegmentHeightAndAngle(datum.cumulativePercentage, radius),
-  })) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
+  // compute cumulative height and angle
+  const segmentsWithCumulativeHeightAndAngle = cumulativePercentages.map((datum) => {
+    const { height, theta } = circularSegmentHeightAndAngle(datum.cumulativePercentage, radius)
+    return {
+      ...datum,
+      theta,
+      cumulativeHeight: height,
+    }
+  }) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
 
-  // compute the circular segment path strings
-  return computeCircularSegmentsInfo(segmentsWithHeightAndAngle, radius, center, defaultedOptions)
+  // compute circular segment real height
+  const segmentsWithHeightsAndAngle = segmentsWithCumulativeHeightAndAngle.map((d, i) => {
+    const { cumulativeHeight } = d
+    const prevH = i === 0 ? 0 : segmentsWithCumulativeHeightAndAngle[i - 1].cumulativeHeight
+    const height = cumulativeHeight - prevH
+    return { ...d, height }
+  })
+
+  // compute the circular segment info
+  return computeCircularSegmentsInfo(segmentsWithHeightsAndAngle, radius, center, defaultedOptions)
 }
 
 /**
@@ -90,21 +103,6 @@ export function circularSegmentHeightAndAngle(
   }
 }
 
-export function computeCumulativeHeights<T extends Percentage>(
-  dataset: Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
-): Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>> {
-  return dataset.reduce((prevWithCumHeights, datum, i) => {
-    const cumulativeHeight = i === 0 ? 0 : prevWithCumHeights[i - 1].cumulativeHeight
-    const height = i === 0 ? 0 : prevWithCumHeights[i - 1].height
-    const newDatum = {
-      ...datum,
-      cumulativeHeight: height + cumulativeHeight,
-    }
-    prevWithCumHeights.push(newDatum)
-    return prevWithCumHeights
-  }, []) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
-}
-
 /**
  * Given the circle radius, the circle center and some information about circular segments (height and angle),
  * it computes and returns more info about those circular segments like:
@@ -125,13 +123,10 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
 ): Array<CirclularSegmentInfo<T>> {
   const { x: cx, y: cy } = center
 
-  const datasetWithCumHeights = computeCumulativeHeights(segmentsInfo)
-  // console.log('datasetWithCumHeights: ', datasetWithCumHeights)
-
-  const segmentsInfoWithPath = datasetWithCumHeights.map((segmentInfo, i) => {
-    const { height, theta, cumulativeHeight } = segmentInfo
-    const hTop = i === 0 ? 0 : segmentsInfo[i - 1].height
-    const hBottom = height
+  const segmentsInfoWithPath = segmentsInfo.map((segmentInfo, i) => {
+    const { cumulativeHeight, height, theta } = segmentInfo
+    const hTop = i === 0 ? 0 : segmentsInfo[i - 1].cumulativeHeight
+    const hBottom = cumulativeHeight
     const sweepFlag = 0
     const largeArcFlag = 0
 
@@ -139,25 +134,8 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
     const xTopRight = cx + sqrt(hTop * (2 * radius - hTop))
     const xBottomLeft = cx - sqrt(hBottom * (2 * radius - hBottom))
     const xBottomRight = cx + sqrt(hBottom * (2 * radius - hBottom))
-    const h = i === 0 ? 0 : segmentsInfo[i - 1].height
-    const hCurrentSegm = height - h
-    const yTop = cy - radius + h
-    const yBottom = yTop + hCurrentSegm
-
-    // if (i === 2) {
-    //   console.log({ cx, cy })
-    //   console.log({ hBottom, hTop })
-    //   console.log('2 * radius: ', 2 * radius)
-    //   console.log('(2 * radius - hBottom): ', 2 * radius - hBottom)
-    //   console.log('sqrt(...): ', sqrt(hBottom * (2 * radius - hBottom)))
-    //   console.log('cx - sqrt(...): ', cx - sqrt(hBottom * (2 * radius - hBottom)))
-    //   console.log({
-    //     xTopLeft,
-    //     xTopRight,
-    //     xBottomLeft,
-    //     xBottomRight,
-    //   })
-    // }
+    const yTop = cy - radius + cumulativeHeight - height
+    const yBottom = yTop + height
 
     const vertices: Vertices = {
       topLeft: { x: xTopLeft, y: yTop },
@@ -165,12 +143,8 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
       bottomLeft: { x: xBottomLeft, y: yBottom },
       bottomRight: { x: xBottomRight, y: yBottom },
     }
-    const circlularSegmentCenter = { x: cx, y: hTop + (hBottom - hTop) / 2 }
+    const circlularSegmentCenter = { x: cx, y: yTop + height / 2 }
 
-    // const path = `M ${xTopLeft} ${hTop}
-    // L ${xTopRight} ${hTop}
-    // L ${xBottomRight} ${hBottom}
-    // L ${xBottomLeft} ${hBottom}`
     const path = `M ${xTopLeft} ${yTop}
         L ${xTopLeft} ${yTop}
         A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xBottomLeft} ${yBottom}

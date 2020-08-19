@@ -1,6 +1,6 @@
 import { sumBy } from 'lodash'
 import { Percentage, Point, CirclularSegmentInfo, Options } from './types'
-import { computeCumulativePercentages, computeInfo } from './math-utils'
+import { computeCumulativePercentages, computeHeightsAndAngle } from './math-utils'
 
 const defaultOptions: Options = {
   // orientation: 'vertical',
@@ -36,5 +36,5 @@ export function computeCircularSegments<T extends Percentage>(
 
   const defaultedOptions = Object.assign({}, defaultOptions, options)
 
-  return computeInfo(radius, center, cumulativePercentages, defaultedOptions)
+  return computeHeightsAndAngle(radius, center, cumulativePercentages, defaultedOptions)
 }

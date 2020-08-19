@@ -5,7 +5,7 @@ import { select, selectAll, Selection } from 'd3-selection'
 import { generateData, COUNTER_EXTENT } from './utils'
 import { computeCircularSegments } from '../src'
 
-const debug = true
+const debug = false
 
 const opacity = 0.6
 const overedOpacity = 0.8
@@ -34,8 +34,7 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
 
   const leftColumn = contentContainer
     .append('div')
-    .attr('class', `${debug ? 'ba b--red bw1' : ''} flex flex-column`)
-  // .attr('class', `${debug ? 'bg-red' : ''} flex flex-column items-center`)
+    .attr('class', `${debug ? 'ba b--red bw1' : ''} flex flex-column items-center`)
 
   const rightColumn = contentContainer
     .append('div')
@@ -75,44 +74,46 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
       selectAll(`.item`).style('opacity', opacity)
     })
 
-  // centers
-  selectionJoin
-    .append('circle')
-    .attr('cx', (datum) => datum.center.x)
-    .attr('cy', (datum) => datum.center.y)
-    .attr('r', 1)
-    .attr('fill', 'white')
+  if (debug) {
+    // centers
+    selectionJoin
+      .append('circle')
+      .attr('cx', (datum) => datum.center.x)
+      .attr('cy', (datum) => datum.center.y)
+      .attr('r', 1)
+      .attr('fill', 'white')
 
-  // vertices
-  const vertices = selectionJoin.append('g')
-  vertices
-    .append('circle')
-    .attr('class', '-topLeft')
-    .attr('cx', (datum) => datum.vertices.topLeft.x)
-    .attr('cy', (datum) => datum.vertices.topLeft.y)
-    .attr('r', 3)
-    .attr('fill', 'tomato')
-  vertices
-    .append('circle')
-    .attr('class', '-topRight')
-    .attr('cx', (datum) => datum.vertices.topRight.x)
-    .attr('cy', (datum) => datum.vertices.topRight.y)
-    .attr('r', 3)
-    .attr('fill', 'orange')
-  vertices
-    .append('circle')
-    .attr('class', '-bottomLeft')
-    .attr('cx', (datum) => datum.vertices.bottomLeft.x)
-    .attr('cy', (datum) => datum.vertices.bottomLeft.y)
-    .attr('r', 3)
-    .attr('fill', 'yellow')
-  vertices
-    .append('circle')
-    .attr('class', '-bottomRight')
-    .attr('cx', (datum) => datum.vertices.bottomRight.x)
-    .attr('cy', (datum) => datum.vertices.bottomRight.y)
-    .attr('r', 3)
-    .attr('fill', 'purple')
+    // vertices
+    const vertices = selectionJoin.append('g')
+    vertices
+      .append('circle')
+      .attr('class', '-topLeft')
+      .attr('cx', (datum) => datum.vertices.topLeft.x)
+      .attr('cy', (datum) => datum.vertices.topLeft.y)
+      .attr('r', 3)
+      .attr('fill', 'tomato')
+    vertices
+      .append('circle')
+      .attr('class', '-topRight')
+      .attr('cx', (datum) => datum.vertices.topRight.x)
+      .attr('cy', (datum) => datum.vertices.topRight.y)
+      .attr('r', 3)
+      .attr('fill', 'orange')
+    vertices
+      .append('circle')
+      .attr('class', '-bottomLeft')
+      .attr('cx', (datum) => datum.vertices.bottomLeft.x)
+      .attr('cy', (datum) => datum.vertices.bottomLeft.y)
+      .attr('r', 3)
+      .attr('fill', 'yellow')
+    vertices
+      .append('circle')
+      .attr('class', '-bottomRight')
+      .attr('cx', (datum) => datum.vertices.bottomRight.x)
+      .attr('cy', (datum) => datum.vertices.bottomRight.y)
+      .attr('r', 3)
+      .attr('fill', 'purple')
+  }
 
   // append legend
   const legendEnterSelection = legendContainer
