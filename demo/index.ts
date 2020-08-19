@@ -48,7 +48,6 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
   // create new data
   const dataset = generateData(COUNTER_EXTENT, sumValue)
   const circularSegments = computeCircularSegments(dataset, r, { x: cx, y: cy })
-  console.log('circularSegments: ', circularSegments)
 
   // append viz
   const selectionJoin = svg

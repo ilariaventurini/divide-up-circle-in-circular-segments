@@ -122,35 +122,10 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
   center: Point,
   options: Options
 ): Array<CirclularSegmentInfo<T>> {
-  const { x: cx, y: cy } = center
-
-  const segmentsInfoWithPath = segmentsInfo.map((segmentInfo, i) => {
-    const { cumulativeHeight, height, theta } = segmentInfo
-    const hTop = i === 0 ? 0 : segmentsInfo[i - 1].cumulativeHeight
-    const hBottom = cumulativeHeight
-
-    // horizontal vertices
-    const xTopLeft = cx - sqrt(hTop * (2 * radius - hTop))
-    const xTopRight = cx + sqrt(hTop * (2 * radius - hTop))
-    const xBottomLeft = cx - sqrt(hBottom * (2 * radius - hBottom))
-    const xBottomRight = cx + sqrt(hBottom * (2 * radius - hBottom))
-    const yTop = cy - radius + cumulativeHeight - height
-    const yBottom = yTop + height
-
-    const verticesHor: Vertices = {
-      topLeft: { x: xTopLeft, y: yTop },
-      topRight: { x: xTopRight, y: yTop },
-      bottomLeft: { x: xBottomLeft, y: yBottom },
-      bottomRight: { x: xBottomRight, y: yBottom },
-    }
-    // rotate vertices if necessary
-    const vertices = computeVertices(verticesHor, { x: cx, y: cy }, options)
-
-    const circlularSegmentCenter =
-      options.orientation === 'horizontal'
-        ? { x: cx, y: yTop + height / 2 }
-        : { x: yTop + height / 2, y: cy }
-    const path = computePath(vertices, radius, theta, options)
+  const segmentsInfoWithPath = segmentsInfo.map((segmentInfo) => {
+    const vertices = computeVertices(segmentInfo, radius, center, options)
+    const circlularSegmentCenter = computeCenter(segmentInfo, radius, center, options)
+    const path = computePath(vertices, radius, segmentInfo.theta, options)
 
     return {
       ...segmentInfo,
@@ -163,22 +138,63 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
   return segmentsInfoWithPath
 }
 
-function computeVertices(vertices: Vertices, rotationPoint: Point, options: Options): Vertices {
+function computeVertices<T extends Percentage>(
+  segmentInfo: Omit<CirclularSegmentInfo<T>, 'path' | 'center'>,
+  radius: number,
+  center: Point,
+  options: Options
+): Vertices {
+  // compute vertices for horizontal orientation
+  const { x: cx, y: cy } = center
+  const { cumulativeHeight, height } = segmentInfo
+
+  const yTop = cy - radius + cumulativeHeight - height
+  const yBottom = yTop + height
+  const xTopLeft = cx - sqrt(yTop * (2 * radius - yTop))
+  const xTopRight = cx + sqrt(yTop * (2 * radius - yTop))
+  const xBottomLeft = cx - sqrt(yBottom * (2 * radius - yBottom))
+  const xBottomRight = cx + sqrt(yBottom * (2 * radius - yBottom))
+
+  const vertices: Vertices = {
+    topLeft: { x: xTopLeft, y: yTop },
+    topRight: { x: xTopRight, y: yTop },
+    bottomLeft: { x: xBottomLeft, y: yBottom },
+    bottomRight: { x: xBottomRight, y: yBottom },
+  }
+
   if (options.orientation === 'horizontal') {
     return vertices
   } else {
+    // if orientation is vertical, rotate points by 90°
     const angle = 90
     const { topLeft, topRight, bottomLeft, bottomRight } = vertices
-    const rTL = rotate(topLeft, rotationPoint, angle)
-    const rTR = rotate(topRight, rotationPoint, angle)
-    const rBL = rotate(bottomLeft, rotationPoint, angle)
-    const rBR = rotate(bottomRight, rotationPoint, angle)
+    const rTL = rotate(topLeft, center, angle)
+    const rTR = rotate(topRight, center, angle)
+    const rBL = rotate(bottomLeft, center, angle)
+    const rBR = rotate(bottomRight, center, angle)
     return {
       topLeft: { ...rBL },
       topRight: { ...rTL },
       bottomLeft: { ...rBR },
       bottomRight: { ...rTR },
     }
+  }
+}
+
+function computeCenter<T extends Percentage>(
+  segmentInfo: Omit<CirclularSegmentInfo<T>, 'path' | 'center'>,
+  radius: number,
+  center: Point,
+  options: Options
+): Point {
+  const { x: cx, y: cy } = center
+  const { cumulativeHeight, height } = segmentInfo
+  const yTop = cy - radius + cumulativeHeight - height
+
+  if (options.orientation === 'horizontal') {
+    return { x: cx, y: yTop + height / 2 }
+  } else {
+    return { x: yTop + height / 2, y: cy }
   }
 }
 
