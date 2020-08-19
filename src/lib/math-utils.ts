@@ -1,163 +1,30 @@
-import {
-  CumulativePercentage,
-  Point,
-  CirclularSegmentInfo,
-  Percentage,
-  Options,
-  Vertices,
-} from './types'
-
-const { PI, sin, cos, pow, sqrt } = Math
+import { Point } from './types'
 
 /**
- * Given an array of objects containing the property `percentage` (number in [0, 1]),
- * it returns an array of objects containing the original values and the cumulative percentage value.
- * @param dataset array of objects containing a property `percentage` (number in [0, 1]) that is the percentage of area to be represented
+ *                        *(nx, ny)
+ *                   .     -
+ *              .           -
+ *         .  angle          -
+ *    *(cx,cy).................*(x,y)
+ *
+ * Rotate the point `point` by angle `angle` with rotation point `center`.
+ * @param point point to rotate
+ * @param center rotation point
+ * @param angle angle in degree
  */
-export function computeCumulativePercentages<T extends Percentage>(
-  dataset: T[]
-): Array<CumulativePercentage<T>> {
-  return dataset.reduce((prevWithCumPercentages, datum, i) => {
-    const cumulativePart = i === 0 ? 0 : prevWithCumPercentages[i - 1].cumulativePercentage
-    const newDatum = {
-      ...datum,
-      cumulativePercentage: datum.percentage + cumulativePart,
-    }
-    prevWithCumPercentages.push(newDatum)
-    return prevWithCumPercentages
-  }, []) as Array<CumulativePercentage<T>>
+export function rotate(point: Point, center: Point, angle: number): Point {
+  const radians = degToRad(angle)
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  const nx = cos * (point.x - center.x) + sin * (point.y - center.y) + center.x
+  const ny = cos * (point.y - center.y) - sin * (point.x - center.x) + center.y
+  return { x: nx, y: ny }
 }
 
 /**
- * Given the circle radius, the circle center and an array of objects,
- * it returns some useful information to draw the circular segments, like:
- * - the original object
- * - the angle subtended by the chord at the centre of the circle related to the circlular segment
- * - the path to draw the circular segment
- * - the center point of the circular segment.
- * @param radius circle radius
- * @param center circle center
- * @param cumulativePercentages array of objects containing the original values and the cumulative percentage value
- * @param options options object
+ * Convert degree to radians.
+ * @param deg angle in degree
  */
-export function computeHeightsAndAngle<T extends Percentage>(
-  radius: number,
-  center: Point,
-  cumulativePercentages: Array<CumulativePercentage<T>>,
-  defaultedOptions: Options
-): Array<CirclularSegmentInfo<T>> {
-  // compute cumulative height and angle
-  const segmentsWithCumulativeHeightAndAngle = cumulativePercentages.map((datum) => {
-    const { height, theta } = circularSegmentHeightAndAngle(datum.cumulativePercentage, radius)
-    return {
-      ...datum,
-      theta,
-      cumulativeHeight: height,
-    }
-  }) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
-
-  // compute circular segment real height
-  const segmentsWithHeightsAndAngle = segmentsWithCumulativeHeightAndAngle.map((d, i) => {
-    const { cumulativeHeight } = d
-    const prevH = i === 0 ? 0 : segmentsWithCumulativeHeightAndAngle[i - 1].cumulativeHeight
-    const height = cumulativeHeight - prevH
-    return { ...d, height }
-  })
-
-  // compute the circular segment info
-  return computeCircularSegmentsInfo(segmentsWithHeightsAndAngle, radius, center, defaultedOptions)
-}
-
-/**
- * Given a percentage [0, 1] of the circle area and the circle radius, it returns the height of the
- * circular segment and the angle (radians) subtended by the chord at the circle center.
- * @param percentage numbers between 0 and 1 that are the percentages of area to be represented
- * @param radius circle radius
- * @param iterations Newton's method number of iterations
- */
-export function circularSegmentHeightAndAngle(
-  percentage: number,
-  radius: number,
-  iterations = 20
-): {
-  height: number
-  theta: number
-} {
-  let theta0
-  let theta1
-  // safe initial starting point for Newton's method (don't remember why)
-  theta1 = pow(12 * percentage * PI, 1 / 3)
-
-  for (let i = 0; i < iterations; ++i) {
-    theta0 = theta1
-    theta1 = (sin(theta0) - theta0 * cos(theta0) + 2 * PI * percentage) / (1 - cos(theta0))
-    theta1 = isNaN(theta1) ? 0 : theta1
-  }
-  percentage = (1 - cos(theta1 / 2)) / 2
-
-  const height = 2 * radius * percentage // height of circular segment
-
-  return {
-    height,
-    theta: theta1,
-  }
-}
-
-/**
- * Given the circle radius, the circle center and some information about circular segments (height and angle),
- * it computes and returns more info about those circular segments like:
- * - the original object
- * - the angle subtended by the chord at the centre of the circle related to the circlular segment
- * - the path to draw the circular segment
- * - the center point of the circular segment..
- * @param segmentsInfo some info about circular segments.
- * @param radius circle radius
- * @param center circle center
- * @param options options object
- */
-export function computeCircularSegmentsInfo<T extends Percentage>(
-  segmentsInfo: Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>,
-  radius: number,
-  center: Point,
-  defaultedOptions: Options
-): Array<CirclularSegmentInfo<T>> {
-  const { x: cx, y: cy } = center
-
-  const segmentsInfoWithPath = segmentsInfo.map((segmentInfo, i) => {
-    const { cumulativeHeight, height, theta } = segmentInfo
-    const hTop = i === 0 ? 0 : segmentsInfo[i - 1].cumulativeHeight
-    const hBottom = cumulativeHeight
-    const sweepFlag = 0
-    const largeArcFlag = 0
-
-    const xTopLeft = cx - sqrt(hTop * (2 * radius - hTop))
-    const xTopRight = cx + sqrt(hTop * (2 * radius - hTop))
-    const xBottomLeft = cx - sqrt(hBottom * (2 * radius - hBottom))
-    const xBottomRight = cx + sqrt(hBottom * (2 * radius - hBottom))
-    const yTop = cy - radius + cumulativeHeight - height
-    const yBottom = yTop + height
-
-    const vertices: Vertices = {
-      topLeft: { x: xTopLeft, y: yTop },
-      topRight: { x: xTopRight, y: yTop },
-      bottomLeft: { x: xBottomLeft, y: yBottom },
-      bottomRight: { x: xBottomRight, y: yBottom },
-    }
-    const circlularSegmentCenter = { x: cx, y: yTop + height / 2 }
-
-    const path = `M ${xTopLeft} ${yTop}
-        L ${xTopLeft} ${yTop}
-        A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xBottomLeft} ${yBottom}
-        L ${xBottomRight} ${yBottom}
-        A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xTopRight} ${yTop}`
-
-    return {
-      ...segmentInfo,
-      path,
-      center: circlularSegmentCenter,
-      vertices,
-    } as CirclularSegmentInfo<T>
-  })
-
-  return segmentsInfoWithPath
+export function degToRad(deg: number): number {
+  return (Math.PI / 180) * deg
 }
