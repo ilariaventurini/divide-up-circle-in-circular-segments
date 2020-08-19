@@ -1,4 +1,13 @@
-import { CumulativePercentage, Point, CirclularSegmentInfo, Percentage } from './types'
+import {
+  CumulativePercentage,
+  Point,
+  CirclularSegmentInfo,
+  Percentage,
+  Options,
+  Vertices,
+} from './types'
+
+const { PI, sin, cos, pow, sqrt } = Math
 
 /**
  * Given an array of objects containing the property `percentage` (number in [0, 1]),
@@ -29,19 +38,21 @@ export function computeCumulativePercentages<T extends Percentage>(
  * @param radius circle radius
  * @param center circle center
  * @param cumulativePercentages array of objects containing the original values and the cumulative percentage value
+ * @param options options object
  */
 export function computeInfo<T extends Percentage>(
   radius: number,
   center: Point,
-  cumulativePercentages: Array<CumulativePercentage<T>>
+  cumulativePercentages: Array<CumulativePercentage<T>>,
+  defaultedOptions: Options
 ): Array<CirclularSegmentInfo<T>> {
   const segmentsWithHeightAndAngle = cumulativePercentages.map((datum) => ({
     ...datum,
-    ...circularSegmentHeight(datum.cumulativePercentage, radius),
-  })) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'circlularSegmentCenter'>>
+    ...circularSegmentHeightAndAngle(datum.cumulativePercentage, radius),
+  })) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
 
   // compute the circular segment path strings
-  return computeCircularSegmentPathStrings(segmentsWithHeightAndAngle, radius, center)
+  return computeCircularSegmentsInfo(segmentsWithHeightAndAngle, radius, center, defaultedOptions)
 }
 
 /**
@@ -51,13 +62,14 @@ export function computeInfo<T extends Percentage>(
  * @param radius circle radius
  * @param iterations Newton's method number of iterations
  */
-export function circularSegmentHeight(
+export function circularSegmentHeightAndAngle(
   percentage: number,
   radius: number,
   iterations = 20
-): { height: number; theta: number } {
-  const { PI, sin, cos, pow } = Math
-
+): {
+  height: number
+  theta: number
+} {
   let theta0
   let theta1
   // safe initial starting point for Newton's method (don't remember why)
@@ -78,6 +90,21 @@ export function circularSegmentHeight(
   }
 }
 
+export function computeCumulativeHeights<T extends Percentage>(
+  dataset: Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
+): Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>> {
+  return dataset.reduce((prevWithCumHeights, datum, i) => {
+    const cumulativeHeight = i === 0 ? 0 : prevWithCumHeights[i - 1].cumulativeHeight
+    const height = i === 0 ? 0 : prevWithCumHeights[i - 1].height
+    const newDatum = {
+      ...datum,
+      cumulativeHeight: height + cumulativeHeight,
+    }
+    prevWithCumHeights.push(newDatum)
+    return prevWithCumHeights
+  }, []) as Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>
+}
+
 /**
  * Given the circle radius, the circle center and some information about circular segments (height and angle),
  * it computes and returns more info about those circular segments like:
@@ -88,36 +115,74 @@ export function circularSegmentHeight(
  * @param segmentsInfo some info about circular segments.
  * @param radius circle radius
  * @param center circle center
+ * @param options options object
  */
-export function computeCircularSegmentPathStrings<T extends Percentage>(
-  segmentsInfo: Array<Omit<CirclularSegmentInfo<T>, 'path' | 'circlularSegmentCenter'>>,
+export function computeCircularSegmentsInfo<T extends Percentage>(
+  segmentsInfo: Array<Omit<CirclularSegmentInfo<T>, 'path' | 'center'>>,
   radius: number,
-  center: Point
+  center: Point,
+  defaultedOptions: Options
 ): Array<CirclularSegmentInfo<T>> {
   const { x: cx, y: cy } = center
-  const { sqrt } = Math
 
-  const segmentsInfoWithPath = segmentsInfo.map((segmentInfo, i) => {
-    const { height, theta } = segmentInfo
+  const datasetWithCumHeights = computeCumulativeHeights(segmentsInfo)
+  // console.log('datasetWithCumHeights: ', datasetWithCumHeights)
+
+  const segmentsInfoWithPath = datasetWithCumHeights.map((segmentInfo, i) => {
+    const { height, theta, cumulativeHeight } = segmentInfo
     const hTop = i === 0 ? 0 : segmentsInfo[i - 1].height
     const hBottom = height
     const sweepFlag = 0
     const largeArcFlag = 0
 
-    const xLeftTop = cx + sqrt(hTop * (2 * radius - hTop))
-    const xRightTop = cx - sqrt(hTop * (2 * radius - hTop))
-    const xLeftBottom = cx + sqrt(hBottom * (2 * radius - hBottom))
-    const xRightBottom = cx - sqrt(hBottom * (2 * radius - hBottom))
+    const xTopLeft = cx - sqrt(hTop * (2 * radius - hTop))
+    const xTopRight = cx + sqrt(hTop * (2 * radius - hTop))
+    const xBottomLeft = cx - sqrt(hBottom * (2 * radius - hBottom))
+    const xBottomRight = cx + sqrt(hBottom * (2 * radius - hBottom))
+    const h = i === 0 ? 0 : segmentsInfo[i - 1].height
+    const hCurrentSegm = height - h
+    const yTop = cy - radius + h
+    const yBottom = yTop + hCurrentSegm
 
+    // if (i === 2) {
+    //   console.log({ cx, cy })
+    //   console.log({ hBottom, hTop })
+    //   console.log('2 * radius: ', 2 * radius)
+    //   console.log('(2 * radius - hBottom): ', 2 * radius - hBottom)
+    //   console.log('sqrt(...): ', sqrt(hBottom * (2 * radius - hBottom)))
+    //   console.log('cx - sqrt(...): ', cx - sqrt(hBottom * (2 * radius - hBottom)))
+    //   console.log({
+    //     xTopLeft,
+    //     xTopRight,
+    //     xBottomLeft,
+    //     xBottomRight,
+    //   })
+    // }
+
+    const vertices: Vertices = {
+      topLeft: { x: xTopLeft, y: yTop },
+      topRight: { x: xTopRight, y: yTop },
+      bottomLeft: { x: xBottomLeft, y: yBottom },
+      bottomRight: { x: xBottomRight, y: yBottom },
+    }
     const circlularSegmentCenter = { x: cx, y: hTop + (hBottom - hTop) / 2 }
 
-    const path = `M ${xLeftTop} ${hTop}
-        L ${xRightTop} ${hTop}
-        A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xRightBottom} ${hBottom}
-        L ${xLeftBottom} ${hBottom}
-        A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xLeftTop} ${hTop}`
+    // const path = `M ${xTopLeft} ${hTop}
+    // L ${xTopRight} ${hTop}
+    // L ${xBottomRight} ${hBottom}
+    // L ${xBottomLeft} ${hBottom}`
+    const path = `M ${xTopLeft} ${yTop}
+        L ${xTopLeft} ${yTop}
+        A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xBottomLeft} ${yBottom}
+        L ${xBottomRight} ${yBottom}
+        A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${xTopRight} ${yTop}`
 
-    return { ...segmentInfo, path, circlularSegmentCenter } as CirclularSegmentInfo<T>
+    return {
+      ...segmentInfo,
+      path,
+      center: circlularSegmentCenter,
+      vertices,
+    } as CirclularSegmentInfo<T>
   })
 
   return segmentsInfoWithPath

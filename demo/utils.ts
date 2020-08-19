@@ -1,6 +1,6 @@
 import { random } from 'lodash'
 
-const COUNTER_EXTENT = [2, 6] as [number, number]
+export const COUNTER_EXTENT = [3, 3] as [number, number]
 
 // Return an array of 'amount' numbers whose sum is exactly 'sum'
 export function randomWithFixedSum(amount: number, sum: number) {

@@ -1,6 +1,11 @@
-import { Percentage, Point, CirclularSegmentInfo } from './types'
-import { computeCumulativePercentages, computeInfo } from './math-utils'
 import { sumBy } from 'lodash'
+import { Percentage, Point, CirclularSegmentInfo, Options } from './types'
+import { computeCumulativePercentages, computeInfo } from './math-utils'
+
+const defaultOptions: Options = {
+  // orientation: 'vertical',
+  orientation: 'horizontal',
+}
 
 /**
  * Given the radius and the center of the circle and an array of objects containing a percentage propery,
@@ -14,9 +19,10 @@ import { sumBy } from 'lodash'
  * @param dataset array of objects, each object must contains a percentage property (a number in [0, 1])
  */
 export function computeCircularSegments<T extends Percentage>(
+  dataset: T[],
   radius: number,
   center: Point,
-  dataset: T[]
+  options?: Options
 ): Array<CirclularSegmentInfo<T>> {
   if (!dataset.length) {
     throw new Error(`The dataset must contain at least one element.`)
@@ -28,5 +34,7 @@ export function computeCircularSegments<T extends Percentage>(
 
   const cumulativePercentages = computeCumulativePercentages(dataset)
 
-  return computeInfo(radius, center, cumulativePercentages)
+  const defaultedOptions = Object.assign({}, defaultOptions, options)
+
+  return computeInfo(radius, center, cumulativePercentages, defaultedOptions)
 }

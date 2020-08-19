@@ -2,10 +2,10 @@ import 'tachyons'
 import 'tachyons-extra'
 import { round } from 'lodash'
 import { select, selectAll, Selection } from 'd3-selection'
-import { generateData } from './utils'
+import { generateData, COUNTER_EXTENT } from './utils'
 import { computeCircularSegments } from '../src'
 
-const debug = false
+const debug = true
 
 const opacity = 0.6
 const overedOpacity = 0.8
@@ -13,7 +13,6 @@ const size = 250
 const r = size / 2
 const cx = r
 const cy = r
-const numberOfSegmentsExtent = [2, 8] as [number, number]
 const sumValue = 1
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,7 +34,8 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
 
   const leftColumn = contentContainer
     .append('div')
-    .attr('class', `${debug ? 'bg-red' : ''} flex flex-column items-center`)
+    .attr('class', `${debug ? 'ba b--red bw1' : ''} flex flex-column`)
+  // .attr('class', `${debug ? 'bg-red' : ''} flex flex-column items-center`)
 
   const rightColumn = contentContainer
     .append('div')
@@ -47,16 +47,20 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
   const legendContainer = rightColumn.append('div').attr('class', `${debug ? 'bg-yellow' : ''}`)
 
   // create new data
-  const dataset = generateData(numberOfSegmentsExtent, sumValue)
-  const circularSegments = computeCircularSegments(r, { x: cx, y: cy }, dataset)
+  const dataset = generateData(COUNTER_EXTENT, sumValue)
+  const circularSegments = computeCircularSegments(dataset, r, { x: cx, y: cy })
+  console.log('circularSegments: ', circularSegments)
 
   // append viz
-  svg
+  const selectionJoin = svg
     .append('g')
     .attr('class', 'paths-container')
     .selectAll('.path')
     .data(circularSegments)
     .enter()
+
+  // paths
+  selectionJoin
     .append('path')
     .attr('class', (_, i) => `path-${i}`)
     .attr('d', (info) => info.path)
@@ -70,6 +74,45 @@ function createCircularSegments(container: Selection<HTMLDivElement, unknown, HT
       select(this).style('fill-opacity', opacity)
       selectAll(`.item`).style('opacity', opacity)
     })
+
+  // centers
+  selectionJoin
+    .append('circle')
+    .attr('cx', (datum) => datum.center.x)
+    .attr('cy', (datum) => datum.center.y)
+    .attr('r', 1)
+    .attr('fill', 'white')
+
+  // vertices
+  const vertices = selectionJoin.append('g')
+  vertices
+    .append('circle')
+    .attr('class', '-topLeft')
+    .attr('cx', (datum) => datum.vertices.topLeft.x)
+    .attr('cy', (datum) => datum.vertices.topLeft.y)
+    .attr('r', 3)
+    .attr('fill', 'tomato')
+  vertices
+    .append('circle')
+    .attr('class', '-topRight')
+    .attr('cx', (datum) => datum.vertices.topRight.x)
+    .attr('cy', (datum) => datum.vertices.topRight.y)
+    .attr('r', 3)
+    .attr('fill', 'orange')
+  vertices
+    .append('circle')
+    .attr('class', '-bottomLeft')
+    .attr('cx', (datum) => datum.vertices.bottomLeft.x)
+    .attr('cy', (datum) => datum.vertices.bottomLeft.y)
+    .attr('r', 3)
+    .attr('fill', 'yellow')
+  vertices
+    .append('circle')
+    .attr('class', '-bottomRight')
+    .attr('cx', (datum) => datum.vertices.bottomRight.x)
+    .attr('cy', (datum) => datum.vertices.bottomRight.y)
+    .attr('r', 3)
+    .attr('fill', 'purple')
 
   // append legend
   const legendEnterSelection = legendContainer
