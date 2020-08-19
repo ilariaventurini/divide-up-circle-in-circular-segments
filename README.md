@@ -149,7 +149,7 @@ You can draw the circular segments using the information above and here is the r
 
 In particular:
 
-![stepS1](https://user-images.githubusercontent.com/44204353/90669310-be3b3100-e251-11ea-84ee-3811e14cc0ec.png)
+![stepS1](https://user-images.githubusercontent.com/44204353/90683814-70312800-e267-11ea-8213-cd042684ec37.png)
 
 ![stepS2](https://user-images.githubusercontent.com/44204353/90673110-8636ec80-e257-11ea-8c06-e508b629593e.png)
 
