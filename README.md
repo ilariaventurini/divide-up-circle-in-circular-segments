@@ -159,7 +159,7 @@ Setting orientation to `vertical` (`computeCircularSegments(dataset, r, center, 
 
 ## 🙈 Demo page
 
-A [demo page](https://divide-up-circle-in-proportional-areas-by-chords.netlify.app/) is available.
+A [demo page](https://divide-up-circle-in-circular-segments.netlify.app/) is available.
 
 ## License
 
