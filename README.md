@@ -166,7 +166,3 @@ A [demo page](https://divide-up-circle-in-circular-segments.netlify.app/) is ava
 [MIT](https://github.com/ilariaventurini/divide-up-circle-in-proportional-areas-by-chords/blob/master/LICENSE) © [Ilaria
 Venturini](https://github.com/ilariaventurini)
 
-<!--
-TODO:
-- [ ]
--->
