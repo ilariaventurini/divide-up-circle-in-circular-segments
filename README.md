@@ -40,7 +40,7 @@ npm install divide-up-circle-in-proportional-areas-by-chords --save
 
 As seen before, you can create circular segments proportional by circle area.
 
-### `computeCircularSegments(r, center, percentages)`
+### `computeCircularSegments(dataset, radius, center, options?)`
 
 The `computeCircularSegments` function accepts 4 parameters and an array of objects in which each object contains the useful information about each circular segment.
 
