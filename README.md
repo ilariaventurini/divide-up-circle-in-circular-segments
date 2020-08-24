@@ -33,13 +33,13 @@ As you can see, in the firs case (library output) the first two circular segment
 ## ⚙️ Install
 
 ```bash
-yarn add divide-up-circle-in-proportional-areas-by-chords
+yarn add divide-up-circle-in-circular-segments
 ```
 
 or
 
 ```bash
-npm install divide-up-circle-in-proportional-areas-by-chords --save
+npm install divide-up-circle-in-circular-segments --save
 ```
 
 ## 📷 Screenshots
