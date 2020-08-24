@@ -1,7 +1,17 @@
 <div align="center" style="text-align: center;">
+  <h1>Divide up circle in circular segments</h1>
 
+Divide a circle into circular segments whose area is proportional to the data\
 [demo page](https://divide-up-circle-in-circular-segments.netlify.app/)
-<h1>Divide up circle in circular segments</h1>
+</div>
+
+<p align="center">
+  <!-- npm version -->
+  <a href="https://www.npmjs.com/package/divide-up-circle-in-circular-segments">
+    <img alt="npm"
+      src="https://img.shields.io/npm/v/divide-up-circle-in-circular-segments">
+  </a>
+</p>
 
 </div>
 
