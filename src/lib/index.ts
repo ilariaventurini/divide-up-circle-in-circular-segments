@@ -30,7 +30,7 @@ export function computeCircularSegments<T extends Percentage>(
     throw new Error(`The dataset must contain at least one element.`)
   }
   const percentageSum = sumBy(dataset, 'percentage')
-  if (percentageSum !== 1) {
+  if (Math.abs(percentageSum - 1) < 0.001) {
     throw new Error(`The sum of 'percentage' values must be 1. Your sum is ${percentageSum}.`)
   }
 

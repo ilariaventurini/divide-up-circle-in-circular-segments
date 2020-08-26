@@ -3,8 +3,8 @@ import 'tachyons-extra'
 import { round } from 'lodash'
 import { select, selectAll, Selection } from 'd3-selection'
 import { generateData, COUNTER_EXTENT } from './utils'
-import { computeCircularSegments } from '../src'
-import { Orientation } from '../src/lib/types'
+import { computeCircularSegments } from '../dist'
+import { Orientation } from '../dist/lib/types'
 
 const debug = false
 
