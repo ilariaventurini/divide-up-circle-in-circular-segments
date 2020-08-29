@@ -1,8 +1,7 @@
 import 'tachyons'
 import 'tachyons-extra'
-import { round } from 'lodash'
 import { select, selectAll, Selection } from 'd3-selection'
-import { generateData, COUNTER_EXTENT } from './utils'
+import { generateData, COUNTER_EXTENT, roundToTwoDecimals } from './utils'
 import { computeCircularSegments } from '../dist'
 import { Orientation } from '../dist/lib/types'
 
@@ -17,7 +16,6 @@ const cy = r
 const sumValue = 1
 
 let orientation = 'horizontal' as Orientation
-let dataset = generateData(COUNTER_EXTENT, sumValue)
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -171,7 +169,7 @@ function createCircularSegments(
   legendEnterSelection
     .append('div')
     .attr('class', 'ml2')
-    .html((d) => `${round(d.percentage * 100, 2)} %`)
+    .html((d) => `${roundToTwoDecimals(d.percentage * 100)} %`)
 
   // append button
   const randomButton = leftColumn

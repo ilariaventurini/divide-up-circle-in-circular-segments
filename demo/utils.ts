@@ -1,4 +1,4 @@
-import { random } from 'lodash'
+import { randomIntFromInterval } from '../src/lib/utils'
 
 export const COUNTER_EXTENT = [2, 6] as [number, number]
 
@@ -24,7 +24,7 @@ export function generateData(
   sumValues = 1
 ): Array<{ percentage: number; color: string }> {
   const [minCounter, maxCounter] = counterExtents
-  const n = random(minCounter, maxCounter)
+  const n = randomIntFromInterval(minCounter, maxCounter)
   const percentages = randomWithFixedSum(n, sumValues)
   return percentages.map((p) => ({ percentage: p, color: randomColor() }))
 
@@ -34,4 +34,12 @@ export function generateData(
   //   { percentage: 0.3, color: '#7f7ad9' },
   //   { percentage: 0.4, color: '#74dfc9' },
   // ]
+}
+
+/**
+ * Return value rounded using two decimals.
+ * @param value value to round
+ */
+export function roundToTwoDecimals(value: number) {
+  return Math.round((value + Number.EPSILON) * 100) / 100
 }

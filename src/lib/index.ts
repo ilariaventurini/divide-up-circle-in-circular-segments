@@ -1,6 +1,6 @@
-import { sumBy } from 'lodash'
 import { Percentage, Point, CirclularSegmentInfo, Options } from './types'
 import { computeCumulativePercentages, computeHeightsAndAngle } from './circular-segment-utils'
+import { sumBy } from './utils'
 
 const defaultOptions: Options = {
   orientation: 'horizontal',
