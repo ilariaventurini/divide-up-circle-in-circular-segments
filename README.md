@@ -1,5 +1,5 @@
 <div align="center" style="text-align: center;">
-  <h1>Divide up circle in circular segments</h1>
+  <h1>Divide a circle in circular segments</h1>
 
 Divide a circle into circular segments whose area is proportional to the data\
 [demo page](https://divide-up-circle-in-circular-segments.netlify.app/)
@@ -118,6 +118,8 @@ interface Vertices {
 I hope the following example can better explain the information written above.
 
 ```ts
+import { computeCircularSegments } from 'divide-up-circle-in-circular-segments'
+
 const dataset = [
   {percentage: 0.3, color: "#ff787a"},
   {percentage: 0.3, color: "#7f7ad9"},
@@ -175,4 +177,3 @@ A [demo page](https://divide-up-circle-in-circular-segments.netlify.app/) is ava
 
 [MIT](https://github.com/ilariaventurini/divide-up-circle-in-proportional-areas-by-chords/blob/master/LICENSE) © [Ilaria
 Venturini](https://github.com/ilariaventurini)
-
