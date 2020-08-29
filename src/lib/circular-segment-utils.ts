@@ -122,9 +122,13 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
   options: Options
 ): Array<CirclularSegmentInfo<T>> {
   return segmentsInfo.map((segmentInfo) => {
+    const { orientation } = options
     const vertices = computeVertices(segmentInfo, radius, center, options)
     const circularSegmentCenter = computeCenter(segmentInfo, radius, center, options)
-    const path = computePath(vertices, radius, segmentInfo.theta, options)
+    const path =
+      orientation === 'horizontal'
+        ? computePathHorizontalOrientation(vertices, radius, segmentInfo.theta)
+        : computePathVerticalOrientation(vertices, radius, segmentInfo.theta)
 
     return {
       ...segmentInfo,
@@ -195,24 +199,28 @@ function computeCenter<T extends Percentage>(
   }
 }
 
-function computePath(vertices: Vertices, radius: number, theta: number, options: Options): string {
-  if (options.orientation === 'horizontal') {
-    const sweepFlag = 0
-    const largeArcFlag = 0
+function computePathHorizontalOrientation(
+  vertices: Vertices,
+  radius: number,
+  theta: number
+): string {
+  const sweepFlag = 0
+  const largeArcFlag = 0
 
-    return `M ${vertices.topLeft.x} ${vertices.topLeft.y}
+  return `M ${vertices.topLeft.x} ${vertices.topLeft.y}
         L ${vertices.topLeft.x} ${vertices.topLeft.y}
         A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${vertices.bottomLeft.x} ${vertices.bottomLeft.y}
         L ${vertices.bottomRight.x} ${vertices.bottomRight.y}
         A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${vertices.topRight.x} ${vertices.topRight.y}`
-  } else {
-    const sweepFlag = 1
-    const largeArcFlag = 0
+}
 
-    return `M ${vertices.topLeft.x} ${vertices.topLeft.y}
+function computePathVerticalOrientation(vertices: Vertices, radius: number, theta: number): string {
+  const sweepFlag = 1
+  const largeArcFlag = 0
+
+  return `M ${vertices.topLeft.x} ${vertices.topLeft.y}
         A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${vertices.topRight.x} ${vertices.topRight.y}
         L ${vertices.bottomRight.x} ${vertices.bottomRight.y}
         A ${radius} ${radius} ${theta} ${largeArcFlag} ${sweepFlag} ${vertices.bottomLeft.x} ${vertices.bottomLeft.y}
         L ${vertices.topLeft.x} ${vertices.topLeft.y}`
-  }
 }
