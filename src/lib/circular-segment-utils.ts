@@ -123,13 +123,13 @@ export function computeCircularSegmentsInfo<T extends Percentage>(
 ): Array<CirclularSegmentInfo<T>> {
   return segmentsInfo.map((segmentInfo) => {
     const vertices = computeVertices(segmentInfo, radius, center, options)
-    const circlularSegmentCenter = computeCenter(segmentInfo, radius, center, options)
+    const circularSegmentCenter = computeCenter(segmentInfo, radius, center, options)
     const path = computePath(vertices, radius, segmentInfo.theta, options)
 
     return {
       ...segmentInfo,
       path,
-      center: circlularSegmentCenter,
+      center: circularSegmentCenter,
       vertices,
     } as CirclularSegmentInfo<T>
   })
