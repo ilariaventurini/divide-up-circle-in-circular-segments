@@ -127,7 +127,7 @@ const dataset = [
 ]
 const radius = 125
 const center = { x: radius, y: radius }
-const circularSegments = computeCircularSegments(dataset, r, center)
+const circularSegments = computeCircularSegments(dataset, radius, center)
 
 // [
 //   {
